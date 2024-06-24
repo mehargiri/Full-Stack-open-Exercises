@@ -21,7 +21,7 @@
 ### Setup
 
 ```shell
-# Go to the solution exercise (courseinfo, unicafe)
+# Go to the solution exercise (courseinfo, unicafe, anecdotes)
 # cd courseinfo
 # pnpm install (to install all the packages)
 # pnpm dev (to start the development build)
