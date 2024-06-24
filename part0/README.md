@@ -1,4 +1,4 @@
-# Part 0
+# Part 0: Fundamentals of Web apps
 
 - General Info
 - Fundamentals of Web Apps
