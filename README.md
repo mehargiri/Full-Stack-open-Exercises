@@ -8,7 +8,7 @@
 
 ### [Part 0: Fundamental of Web Apps](./part0)
 
-### Part 1: Introduction to React
+### [Part 1: Introduction to React](./part1)
 
 ### Part 2: Communicating with server
 
