@@ -10,7 +10,7 @@
 
 ### [Part 1: Introduction to React](./part1)
 
-### Part 2: Communicating with server
+### [Part 2: Communicating with server](./part2)
 
 ### Part 3: Programming a server with NodeJS and Express
 

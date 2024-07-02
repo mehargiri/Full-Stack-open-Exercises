@@ -22,7 +22,7 @@
 ### Setup
 
 ```shell
-# Go to the solution exercise (courseinfo)
+# Go to the solution exercise (courseinfo, phonebook, countries)
 cd courseinfo
 pnpm install # to install all the packages
 pnpm dev # to start the development build
