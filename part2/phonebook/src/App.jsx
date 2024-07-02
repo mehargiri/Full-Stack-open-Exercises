@@ -62,7 +62,7 @@ const App = () => {
 			return;
 		}
 
-		const newId = Number(persons[persons.length - 1].id) + 1;
+		const newId = Number(persons[persons.length - 1]?.id ?? 0) + 1;
 		const newPerson = { name: newName, number: newNumber, id: String(newId) };
 
 		try {
