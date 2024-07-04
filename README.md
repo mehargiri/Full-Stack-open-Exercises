@@ -12,7 +12,7 @@
 
 ### [Part 2: Communicating with server](./part2)
 
-### Part 3: Programming a server with NodeJS and Express
+### [Part 3: Programming a server with NodeJS and Express](./part3)
 
 ### Part 4: Testing Express servers, user administration
 

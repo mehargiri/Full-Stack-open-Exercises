@@ -24,7 +24,14 @@
 # Go to the phonebook folder
 cd phonebook
 pnpm install # to install all the packages
+pnpm build:ui # to build the frontend and add the dist folder to the part3/phonebook folder
 pnpm dev # to start the development build
+# OR
+pnpm start # to start the production build
+
+# You also need to create a .env file with the following values
+MONGO_URI=
+PORT=
 ```
 
 After using the command `pnpm dev`, you can access the frontend development build on: [http://localhost:3001](http://localhost:3001/)
