@@ -1,141 +1,142 @@
-import cors from 'cors'
-import express from 'express'
-import morgan from 'morgan'
-import { Person } from './models/person.js'
+import cors from "cors";
+import express from "express";
+import morgan from "morgan";
+import { Person } from "./models/person.js";
 
-const app = express()
-const port = process.env.PORT || 3001
+const app = express();
+const port = process.env.PORT || 3001;
 
 // Middlewares
-app.use(cors())
-morgan.token('body', (req) => JSON.stringify(req.body))
-app.use(express.json())
+app.use(cors());
+morgan.token("body", (req) => JSON.stringify(req.body));
+app.use(express.json());
 app.use(
-  morgan(':method :url :status :res[content-length] - :response-time ms :body')
-)
-app.use(express.static('dist'))
+	morgan(":method :url :status :res[content-length] - :response-time ms :body")
+);
+app.use(express.static("dist"));
 
 // Routes
-app.get('/api/persons', async (req, res) => {
-  const people = await Person.find({})
-  return res.json(people)
-})
+app.get("/api/persons", async (req, res) => {
+	const people = await Person.find({});
+	return res.json(people);
+});
 
-app.get('/info', (req, res) => {
-  const dateString = new Date().toString()
+app.get("/info", (req, res) => {
+	const dateString = new Date().toString();
 
-  const response = `<p>Phonebook has info for ${Person.length} people</p>
-  <p>${dateString}</p>`
+	const response = `<p>Phonebook has info for ${Person.length} people</p>
+  <p>${dateString}</p>`;
 
-  return res.send(response)
-})
+	return res.send(response);
+});
 
-app.get('/api/persons/:id', async (req, res) => {
-  const { id } = req.params
+app.get("/api/persons/:id", async (req, res) => {
+	const { id } = req.params;
 
-  const person = await Person.findById(id)
+	const person = await Person.findById(id);
 
-  if (!person) {
-    return res.status(404).send('The person does not exist')
-  }
+	if (!person) {
+		return res.status(404).send("The person does not exist");
+	}
 
-  return res.json(person)
-})
+	return res.json(person);
+});
 
-app.delete('/api/persons/:id', async (req, res, next) => {
-  try {
-    const { id } = req.params
-    console.log('The id is ', id)
+app.delete("/api/persons/:id", async (req, res, next) => {
+	try {
+		const { id } = req.params;
 
-    const person = await Person.findById(id).lean()
+		const person = await Person.findById(id).lean();
 
-    if (!person) {
-      return res.status(404).send('The person does not exist')
-    }
+		if (!person) {
+			return res.status(404).send("The person does not exist");
+		}
 
-    await Person.deleteOne({ _id: id }).lean()
-    return res.status(204).end()
-  } catch (error) {
-    next(error)
-  }
-})
+		await Person.deleteOne({ _id: id }).lean();
+		return res.status(204).end();
+	} catch (error) {
+		next(error);
+	}
+});
 
-app.post('/api/persons', async (req, res, next) => {
-  try {
-    const { name, number } = req.body
+app.post("/api/persons", async (req, res, next) => {
+	try {
+		const { name, number } = req.body;
 
-    if (!name || !number) {
-      return res.status(400).json({ error: 'missing name or number' })
-    }
+		if (!name || !number) {
+			return res.status(400).json({ error: "missing name or number" });
+		}
 
-    const personExists = await Person.findOne({ name: name }).lean()
+		const personExists = await Person.findOne({ name: name }).lean();
 
-    if (personExists) {
-      return res.status(400).json({ error: 'name must be unique' })
-    }
+		if (personExists) {
+			return res.status(400).json({ error: "name must be unique" });
+		}
 
-    const newContact = new Person({
-      name,
-      number,
-    })
+		const newContact = new Person({
+			name,
+			number,
+		});
 
-    await newContact.save()
-    return res.json(newContact)
-  } catch (error) {
-    next(error)
-  }
-})
+		await newContact.save();
+		return res.json(newContact);
+	} catch (error) {
+		next(error);
+	}
+});
 
-app.put('/api/persons/:id', async (req, res, next) => {
-  try {
-    const { name, number } = req.body
+app.put("/api/persons/:id", async (req, res, next) => {
+	try {
+		const { name, number } = req.body;
 
-    if (!name || !number) {
-      return res.status(400).json({ error: 'missing name or number' })
-    }
+		if (!name || !number) {
+			return res.status(400).json({ error: "missing name or number" });
+		}
 
-    const update = {
-      name,
-      number,
-    }
+		const update = {
+			name,
+			number,
+		};
 
-    const updatedPerson = await Person.findByIdAndUpdate(
-      req.params.id,
-      update,
-      {
-        new: true,
-        runValidators: true,
-        context: 'query',
-      }
-    )
-    return res.json(updatedPerson)
-  } catch (error) {
-    next(error)
-  }
-})
+		const updatedPerson = await Person.findByIdAndUpdate(
+			req.params.id,
+			update,
+			{
+				new: true,
+				runValidators: true,
+				context: "query",
+			}
+		);
+		return res.json(updatedPerson);
+	} catch (error) {
+		next(error);
+	}
+});
 
 const unknownEndpoint = (req, res) => {
-  return res.status(404).send({ error: 'unknown endpoint' })
-}
+	return res.status(404).send({ error: "unknown endpoint" });
+};
 
-app.use(unknownEndpoint)
+app.use(unknownEndpoint);
 
 const errorHandler = (error, req, res, next) => {
-  console.log(error.message)
+	console.error(error.message);
 
-  if (error.name === 'CastError') {
-    return res.status(400).send({ error: 'malformatted id' })
-  }
-  if (error.name === 'ValidationError') {
-    const errorMessages = Object.values(error.errors).map(
-      (error) => error.message
-    )
-    return res.status(400).json({ error: errorMessages })
-  }
-}
+	if (error.name === "CastError") {
+		return res.status(400).send({ error: "malformatted id" });
+	}
+	if (error.name === "ValidationError") {
+		const errorMessages = Object.values(error.errors).map(
+			(error) => error.message
+		);
+		return res.status(400).json({ error: errorMessages });
+	}
 
-app.use(errorHandler)
+	next(error);
+};
+
+app.use(errorHandler);
 
 app.listen(port, () => {
-  console.info(`Server started on http://localhost:${port}`)
-})
+	console.info(`Server started on http://localhost:${port}`);
+});

@@ -35,10 +35,10 @@ const App = () => {
 
 			if (addNumber) {
 				try {
-					await updateOne(selectedPerson.id, newPerson);
+					const updatedPerson = await updateOne(selectedPerson.id, newPerson);
 					setPersons(
 						persons.map((person) =>
-							person.id === selectedPerson.id ? newPerson : person
+							person.id === selectedPerson.id ? updatedPerson : person
 						)
 					);
 					setMessage({
@@ -66,12 +66,11 @@ const App = () => {
 			return;
 		}
 
-		const newId = Number(persons[persons.length - 1]?.id ?? 0) + 1;
-		const newPerson = { name: newName, number: newNumber, id: String(newId) };
+		const newPerson = { name: newName, number: newNumber };
 
 		try {
-			await addOne(newPerson);
-			setPersons([...persons, newPerson]);
+			const createdPerson = await addOne(newPerson);
+			setPersons([...persons, createdPerson]);
 			setMessage({
 				text: `Added ${newName}`,
 				errorState: false,

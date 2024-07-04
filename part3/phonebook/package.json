@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "nodemon --exec 'node --env-file=.env' index.js",
-		"start": "node --env-file=.env index.js",
+		"start": "node index.js",
 		"build:ui": "rm -rf dist && cd ../../part2/phonebook && pnpm i && pnpm build && cp -r dist ../../part3/phonebook",
 		"lint": "eslint . --fix"
 	},
