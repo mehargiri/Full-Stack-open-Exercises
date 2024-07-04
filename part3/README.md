@@ -21,10 +21,10 @@
 ### Setup
 
 ```shell
-# Go to the solution exercise (courseinfo, phonebook, countries)
-cd courseinfo
+# Go to the phonebook folder
+cd phonebook
 pnpm install # to install all the packages
 pnpm dev # to start the development build
 ```
 
-After using the command `pnpm dev`, you can access the frontend development build on: [http://localhost:5173/](http://localhost:5173/)
+After using the command `pnpm dev`, you can access the frontend development build on: [http://localhost:3001](http://localhost:3001/)
