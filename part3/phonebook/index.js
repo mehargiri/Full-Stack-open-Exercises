@@ -30,12 +30,13 @@ let data = [
 ];
 
 // Middlewares
-app.use(express.json());
+app.use(cors());
 morgan.token("body", (req) => JSON.stringify(req.body));
+app.use(express.json());
 app.use(
 	morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
-app.use(cors());
+app.use(express.static("dist"));
 
 // Routes
 app.get("/api/persons", (req, res) => {

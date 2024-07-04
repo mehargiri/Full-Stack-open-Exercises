@@ -6,7 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "nodemon index.js",
-		"start": "node index.js"
+		"start": "node index.js",
+		"build:ui": "rm -rf dist && cd ../../part2/phonebook && pnpm i && pnpm build && cp -r dist ../../part3/phonebook"
 	},
 	"keywords": [],
 	"author": "",
