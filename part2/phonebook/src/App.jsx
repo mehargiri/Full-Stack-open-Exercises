@@ -46,8 +46,12 @@ const App = () => {
 						errorState: false,
 					});
 				} catch (error) {
+					// setMessage({
+					// 	text: `Information of ${selectedPerson.name} has already been removed from server`,
+					// 	errorState: true,
+					// });
 					setMessage({
-						text: `Information of ${selectedPerson.name} has already been removed from server`,
+						text: error.response.data.error.join("\n"),
 						errorState: true,
 					});
 				}
@@ -73,8 +77,12 @@ const App = () => {
 				errorState: false,
 			});
 		} catch (error) {
+			// setMessage({
+			// 	text: `Information of ${newName} has already been removed from server`,
+			// 	errorState: true,
+			// });
 			setMessage({
-				text: `Information of ${newName} has already been removed from server`,
+				text: error.response.data.error.join("\n"),
 				errorState: true,
 			});
 		}
