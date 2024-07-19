@@ -79,7 +79,7 @@ app.post("/api/persons", async (req, res, next) => {
 		});
 
 		await newContact.save();
-		return res.json(newContact);
+		return res.status(201).json(newContact);
 	} catch (error) {
 		next(error);
 	}
