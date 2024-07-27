@@ -4,6 +4,7 @@ import "express-async-errors";
 import mongoose from "mongoose";
 import blogRouter from "./controllers/blogs.js";
 import loginRouter from "./controllers/login.js";
+import testingRouter from "./controllers/testing.js";
 import userRouter from "./controllers/users.js";
 import { MONGO_URI } from "./utils/config.js";
 import { info } from "./utils/logger.js";
@@ -23,6 +24,10 @@ app.use(express.json());
 app.use("/api/users", userRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/blogs", blogRouter);
+
+if (process.env.NODE_ENV === "test") {
+	app.use("/api/testing", testingRouter);
+}
 
 app.use(errorHandler);
 

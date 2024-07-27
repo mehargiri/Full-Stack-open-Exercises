@@ -7,7 +7,9 @@
 	"scripts": {
 		"dev": "nodemon --env-file=.env index.js",
 		"start": "cross-env NODE_ENV=production node --env-file=.env index.js",
-		"test": "cross-env NODE_ENV=test node --env-file=.env --test --test-concurrency=1 ./tests/*"
+		"test": "cross-env NODE_ENV=test node --env-file=.env --test --test-concurrency=1 ./tests/*",
+		"start:test": "cross-env NODE_ENV=test node --env-file=.env index.js",
+		"build:ui": "rm -rf dist && cd ../../../../part5/bloglist-frontend/ && pnpm build && cp -r build ../../../../part4/bloglist"
 	},
 	"keywords": [],
 	"author": "",
