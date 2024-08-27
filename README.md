@@ -24,7 +24,7 @@
 
 ### Part 8: GraphQL
 
-### Part 9: TypeScript
+### [Part 9: TypeScript](./part9)
 
 ### Part 10: React Native
 
