@@ -1,0 +1,6 @@
+[submodule "part11/--name"]
+	path = part11/--name
+	url = https://mehargiri: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@github.com/mehargiri/full-stack-open-pokedex.git
+[submodule "full-stack-open-pokedex"]
+	path = part11/full-stack-open-pokedex
+	url = https://mehargiri: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@github.com/mehargiri/full-stack-open-pokedex.git
