@@ -1,5 +1,6 @@
-import axios from "axios";
-const baseUrl = "http://localhost:3001/api/blogs";
+import axios from 'axios';
+// const baseUrl = "http://localhost:3001/api/blogs";
+const baseUrl = 'api/blogs';
 
 let token = null;
 
