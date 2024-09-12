@@ -13,16 +13,16 @@ import { errorHandler } from './utils/middleware.js';
 const app = express();
 
 const connectDB = async () => {
-  await mongoose.connect(MONGO_URI);
-  info('Connected to the database');
+	await mongoose.connect(MONGO_URI);
+	info('Connected to the database');
 };
 connectDB();
 
 app.use(cors());
 app.use(express.json());
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('dist'));
+if (process.env.NODE_ENV !== 'development') {
+	app.use(express.static('dist'));
 }
 
 app.use('/api/users', userRouter);
@@ -30,7 +30,7 @@ app.use('/api/login', loginRouter);
 app.use('/api/blogs', blogRouter);
 
 if (process.env.NODE_ENV === 'test') {
-  app.use('/api/testing', testingRouter);
+	app.use('/api/testing', testingRouter);
 }
 
 app.use(errorHandler);
