@@ -18,7 +18,12 @@ const connectDB = async () => {
 };
 connectDB();
 
-app.use(cors());
+app.use(
+	cors({
+		credentials: true,
+		origin: [`http://localhost:${process.env.PORT}`],
+	})
+);
 app.use(express.json());
 
 if (process.env.NODE_ENV !== 'development') {
