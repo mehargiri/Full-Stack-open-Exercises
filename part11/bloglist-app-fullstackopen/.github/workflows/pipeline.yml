@@ -1,0 +1,101 @@
+name: BlogList App Deployment Pipeline
+
+on:
+  push:
+    paths:
+      - 'part11/bloglist-app-fullstackopen/**'
+    branches: [main]
+  pull_request:
+    paths:
+      - 'part11/bloglist-app-fullstackopen/**'
+    branches: [main]
+    types: [synchronize, opened]
+
+jobs:
+  bloglist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TEST_MONGO_URI: ${{secrets.TEST_MONGO_URI}}
+      PORT: ${{secrets.PORT}}
+      JWT_SECRET: ${{secrets.JWT_SECRET}}
+    steps:
+      - name: Checkout only bloglist app inside part11
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: true
+          sparse-checkout-folder: 'part11/bloglist-app-fullstackopen'
+      - name: Setup Node.js for backend
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - name: Install PNPM for further dependency installation
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Install Backend Dependencies
+        run: pnpm i
+      - name: Check Style (Backend)
+        run: pnpm lint
+      - name: Run Unit Tests using Node.js built-in test runner
+        run: pnpm test
+      - name: Install Frontend Dependencies
+        run: cd frontend && pnpm i
+      - name: Check Style (Frontend)
+        run: cd frontend && pnpm lint
+      - name: Run Unit Tests using Vitest
+        run: cd frontend && pnpm test
+      - name: Install Playwright Browsers
+        run: cd frontend && pnpm dlx playwright install --with-deps
+      - name: Build Production App
+        run: pnpm build:ui
+      - name: Run Playwright e2e Tests
+        run: cd frontend && pnpm test:e2e
+      - name: Upload Playwright Tests report
+        uses: actions/upload-artifact@v4
+        if: ${{!cancelled()}}
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 5
+      - name: Deployment to Render.io
+        id: deploy
+        if: ${{github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '),'#skip')}}
+        run: curl ${{secrets.RENDER_DEPLOY_HOOK}}
+      - name: Discord Webhook (Success)
+        if: ${{success() && steps.deploy.outcome == 'success'}}
+        uses: stegzilla/discord-notify@v2
+        with:
+          webhook_url: ${{secrets.DISCORD_WEBHOOK}}
+          username: 'FullStack Part 11 Web Hook'
+          avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+          title: A new version of BlogList App has been deployed
+          message: "to ${{secrets.DEPLOYED_URL}}\n**by ${{github.triggering_actor}}**"
+          colour: '#00FF00'
+      - name: Discord Webhook (Failure)
+        if: ${{failure()}}
+        uses: stegzilla/discord-notify@v2
+        with:
+          webhook_url: ${{secrets.DISCORD_WEBHOOK}}
+          username: 'FullStack Part 11 Web Hook'
+          avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+          title: 'Build of BlogList App has Failed :('
+          message: "**Commit**\n${{github.server_url}}/${{github.repository}}/commit${{github.sha}}\n**by ${{github.triggering_actor}} broke the build!**"
+          colour: '#FF0000'
+  tag_release:
+    needs: bloglist
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: ${{github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+    steps:
+      - name: Checkout only bloglist app inside part11
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: true
+          sparse-checkout-folder: 'part11/bloglist-app-fullstackopen'
+      - name: Bump version number and release tag
+        uses: anothrNick/github-tag-action@1.70.0
+        with:
+          DEFAULT_BUMP: patch
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          WITH_V: true
