@@ -1,10 +1,10 @@
 # Part 11: CI/CD
 
-- Background and introduction
-- First steps with TypeScript
-- Typing an Express app
-- React with types
-- Grande finale: Patientor
+- Introduction to CI/CD
+- Getting Started with Github Actions
+- Deployment
+- Keeping green
+- Expanding Further
 
 ---
 
@@ -20,3 +20,14 @@
 
 - [Node.js](https://nodejs.org/en)
 - [NPM](https://www.npmjs.com/)
+- [PNPM](https://pnpm.io/)
+
+### Setup
+
+```shell
+# There are two folders in this part: bloglist-app-fullstackopen and full-stack-open-pokedex
+
+# The first folder is a monorepo of bloglist app created in part 4 and part 5. Only the content inside the .github folder is new
+
+# The second folder is a monorepo of a pokedex app which was used to learn github actions. All the content except the .github folder was cloned from an existing repo
+```
