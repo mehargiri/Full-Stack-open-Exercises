@@ -1,0 +1,29 @@
+Script started on Mon Sep 16 14:11:13 2024
+
+╭─   part12  main* 
+╰─ ❯zsh in part12
+
+❯ docker start -i busy_chatterjee
+
+root@44c38ec0c9f5: nano /usr/src/app/index.js 
+
+[ Reading... ][ Read 0 lines ]  GNU nano 7.2 /usr/src/app/index.js  
+^G Help^O Write Out  ^W Where Is   ^K Cut^T Execute    ^C Location
+^X Exit^R Read File  ^\ Replace    ^U Paste^J Justify    ^/ Go To Line
+*
+console.log('Hello World') M-D DOS Format M-A Append M-B Backup FileC Cancel M-M Mac Format M-P Prepend ^T Browse
+File Name to Write: /usr/src/app/index.js   [ Writing... ] [ Wrote 1 line ]^O Write Out  ^W Where Is   ^K Cut ^T Execute    ^C LocationX Exit ^R Read File  ^\ Replace    ^U Paste      ^J Justify    ^/ Go To Line
+
+/root@44c38ec0c9f5:/# cat /usr/src/app/index.js 
+
+console.log('Hello World')
+/root@44c38ec0c9f5:/# exit
+
+exit                                                                                 
+
+╭─   part12  main* 
+╰─ ❯0;zsh in part12 57.193s
+
+❯ exit
+
+Script done on Mon Sep 16 14:12:22 2024

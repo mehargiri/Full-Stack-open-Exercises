@@ -1,0 +1,57 @@
+Script started on Mon Sep 16 14:07:50 2024
+                                                                                
+ ╭─   part12  main* 
+╰─ ❯zsh in part12
+
+❯ docker container run -it ubuntu bash
+
+Unable to find image 'ubuntu:latest' locally
+latest: Pulling from library/ubuntu
+
+
+9f23a71f1e31: Pulling fs layer 
+
+9f23a71f1e31: Downloading  294.2kB/28.84MB
+
+9f23a71f1e31: Downloading  9.755MB/28.84MB
+
+9f23a71f1e31: Downloading  19.55MB/28.84MB
+
+9f23a71f1e31: Verifying Checksum 
+
+9f23a71f1e31: Download complete 
+
+9f23a71f1e31: Extracting  294.9kB/28.84MB
+
+9f23a71f1e31: Extracting  5.308MB/28.84MB
+
+9f23a71f1e31: Extracting  8.552MB/28.84MB
+
+9f23a71f1e31: Extracting  12.98MB/28.84MB
+
+9f23a71f1e31: Extracting  19.76MB/28.84MB
+
+9f23a71f1e31: Extracting  24.18MB/28.84MB
+
+9f23a71f1e31: Extracting  27.13MB/28.84MB
+
+9f23a71f1e31: Extracting  28.61MB/28.84MB
+
+9f23a71f1e31: Extracting  28.84MB/28.84MB
+
+9f23a71f1e31: Pull complete 
+Digest: sha256:8a37d68f4f73ebf3d4efafbcf66379bf3728902a8038616808f04e34a9ab63ee
+Status: Downloaded newer image for ubuntu:latest
+0;root@44c38ec0c9f5: /root@44c38ec0c9f5:/# mkdir /usr/src/app
+
+0;root@44c38ec0c9f5: /root@44c38ec0c9f5:/# touch /usr/src/app/index.js
+
+0;root@44c38ec0c9f5: /root@44c38ec0c9f5:/# exit
+
+exit                                                                                  
+
+╭─   part12  main* 
+╰─ ❯zsh in part12 34.092s
+❯ exit
+
+Script done on Mon Sep 16 14:08:41 2024

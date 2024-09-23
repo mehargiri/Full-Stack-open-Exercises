@@ -1,0 +1,59 @@
+Script started on Tue Sep 17 16:58:23 2024
+
+╭─   part12  main* 
+╰─ ❯zsh in part12
+
+❯ docker exec -it todo-backend-mongo-1 bash
+
+/root@b433c53b09f7:/# mongosh -u root -p example
+
+mongosh mongodb://<credentials>@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000
+Current Mongosh Log ID:	66e9ed7b9c0111904f1681ec
+Connecting to:		mongodb://<credentials>@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.1
+Using MongoDB:		7.0.14
+Using Mongosh:		2.3.1
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+
+To help improve our products, anonymous usage data is collected and sent to MongoDB periodically (https://www.mongodb.com/legal/privacy-policy).
+You can opt-out by running the disableTelemetry() command.
+
+ ------
+   The server generated these startup warnings when booting
+   2024-09-17T20:58:21.402+00:00: /sys/kernel/mm/transparent_hugepage/enabled is 'always'. We suggest setting it to 'never' in this binary version
+   2024-09-17T20:58:21.402+00:00: vm.max_map_count is too low
+------
+
+test> show dbs
+
+admin         100.00 KiB
+config         12.00 KiB
+local          40.00 KiB
+the_database   40.00 KiB
+test> shtest> stest> use the_datanastest> use the_datanatest> use the_datantest> use the_database
+
+switched to db the_database
+the_database> show collections
+
+todos
+the_database> db.todos.find({})
+
+[
+  {
+    _id: ObjectId('66e9ed6ae4085a8d3a1681ed'),
+    text: 'Write code',
+    done: true
+  },
+  {
+    _id: ObjectId('66e9ed6ae4085a8d3a1681ee'),
+    text: 'Learn about containers',
+    done: false
+  }
+]
+the_database> db.todos.insertOne({text:"Increase the number of tools in my tool belt", done: false})
+
+{
+  acknowledged: true,
+  insertedId: ObjectId('66e9eda59c0111904f1681ed')
+}
