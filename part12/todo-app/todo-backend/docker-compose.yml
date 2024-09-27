@@ -1,6 +1,8 @@
 services:
   app:
     image: todo-backend
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 3000:3000

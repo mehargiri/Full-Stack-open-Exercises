@@ -6,12 +6,10 @@ COPY --chown=node:node . .
 
 RUN npm i -g pnpm
 
-RUN pnpm i --frozen-lockfile --prod
+RUN pnpm i
 
 ENV DEBUG=playground:*
 
-ENV NODE_ENV=production
-
 USER node
 
-CMD [ "pnpm", "start" ]
+CMD [ "pnpm", "dev" ]
