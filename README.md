@@ -30,6 +30,6 @@
 
 ### [Part 11: CI/CD](./part11)
 
-### Part 12: Containers
+### [Part 12: Containers](./part12)
 
 ### Part 13: Using relational databases
