@@ -1,0 +1,39 @@
+services:
+  server:
+    image: bloglist-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        PORT: ${PORT}
+        JWT_SECRET: ${JWT_SECRET}
+        TEST_MONGO_URI: ${TEST_MONGO_URI}
+        PROD_MONGO_URI: ${PROD_MONGO_URI}
+    container_name: backend-container
+
+  app:
+    image: bloglist-frontend
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+      args:
+        PORT: ${PORT}
+        JWT_SECRET: ${JWT_SECRET}
+        TEST_MONGO_URI: ${TEST_MONGO_URI}
+    container_name: frontend-container
+    depends_on:
+      - server
+
+  nginx:
+    image: nginx:mainline-bookworm
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    container_name: reverse_proxy
+    depends_on:
+      - server
+      - app

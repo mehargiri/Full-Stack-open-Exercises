@@ -1,0 +1,9 @@
+**/node_modules/
+**/dist/
+**/.dockerignore
+**/.gitignore
+**/*Dockerfile*
+docker-compose*.yml
+**/playwright-report/
+**/test-results/
+**/.env

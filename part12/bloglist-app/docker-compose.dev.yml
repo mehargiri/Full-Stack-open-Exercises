@@ -1,0 +1,37 @@
+services:
+  server:
+    image: bloglist-backend-dev
+    build:
+      context: ./backend
+      dockerfile: dev.Dockerfile
+      args:
+        PORT: ${PORT}
+        JWT_SECRET: ${JWT_SECRET}
+        TEST_MONGO_URI: ${TEST_MONGO_URI}
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    container_name: backend-dev-container
+
+  app:
+    image: bloglist-frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    container_name: frontend-dev-container
+    depends_on:
+      - server
+
+  nginx:
+    image: nginx:mainline-bookworm
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: reverse_proxy
+    depends_on:
+      - server
+      - app
