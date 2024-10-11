@@ -1,0 +1,15 @@
+Script started on Mon Oct  7 23:43:28 2024
+
+╭─   part13  main* 
+╰─ ❯ node --env-file=.env cli.js
+
+Executing (default): SELECT 1+1 AS result
+Executing (default): select * from blogs
+Dan Abramov: On let vs const, 0 likes
+Laurenz Albe: Gaps in sequences in PostgreSQL, 0 likes
+Addy Osmani: Patterns For Large-Scale JavaScript Application Architecture, 0 likes
+
+╭─   part13  main* 
+╰─ ❯ exit
+
+Script done on Mon Oct  7 23:43:46 2024
