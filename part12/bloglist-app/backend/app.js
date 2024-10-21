@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
+import { xss } from 'express-xss-sanitizer';
 import mongoose from 'mongoose';
 import blogRouter from './controllers/blogs.js';
 import loginRouter from './controllers/login.js';
@@ -25,6 +26,7 @@ app.use(
 	})
 );
 app.use(express.json());
+app.use(xss());
 
 app.use(express.static('dist'));
 

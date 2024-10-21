@@ -25,6 +25,7 @@
 	},
 	"dependencies": {
 		"express": "^4.21.0",
+		"express-xss-sanitizer": "^1.2.0",
 		"uuid": "^10.0.0"
 	}
 }
