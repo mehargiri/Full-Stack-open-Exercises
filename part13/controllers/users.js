@@ -57,10 +57,33 @@ router.put('/:username', async (req, res) => {
 	return res.json(removeBadProps(updatedUser));
 });
 
-router.get('/:id', async (req, res) => {
+router.put('/:id/ban', async (req, res) => {
 	const { id } = req.params;
 
-	const user = await User.findByPk(id, attributesConfig);
+	const user = await User.findByPk(id);
+	if (!user) throw Error('User not found. Check the user id!', { cause: 404 });
+
+	await user.update({ disabled: true });
+	return res.sendStatus(204);
+});
+
+router.get('/:id', async (req, res) => {
+	const where = {};
+	const { read } = req.query;
+
+	if (read) where.read = read === 'true';
+
+	const { id } = req.params;
+
+	const user = await User.findByPk(id, {
+		...attributesConfig,
+		include: {
+			model: Blog,
+			as: 'readings',
+			attributes: { exclude: ['userId'] },
+			through: { as: 'readinglists', attributes: ['id', 'read'], where },
+		},
+	});
 
 	if (!user) throw Error('User not found. Check the id!', { cause: 404 });
 

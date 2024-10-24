@@ -3,12 +3,15 @@ import rateLimit from 'express-rate-limit';
 import authorRouter from './controllers/authors.js';
 import blogRouter from './controllers/blogs.js';
 import loginRouter from './controllers/login.js';
+import logoutRouter from './controllers/logout.js';
+import readingListRouter from './controllers/readingLists.js';
 import userRouter from './controllers/users.js';
 import { PORT } from './util/config.js';
 import { connectDB } from './util/db.js';
 import { errorHandler } from './util/middleware.js';
 
 const app = express();
+
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
 	limit: 200,
@@ -23,6 +26,8 @@ app.use('/api/blogs', blogRouter);
 app.use('/api/users', userRouter);
 app.use('/api/authors', authorRouter);
 app.use('/api/login', loginRouter);
+app.use('/api/logout', logoutRouter);
+app.use('/api/readinglists', readingListRouter);
 
 app.use(errorHandler);
 

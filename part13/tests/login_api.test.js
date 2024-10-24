@@ -1,11 +1,10 @@
-// import 'express-async-errors';
 import assert from 'node:assert';
 import { after, before, describe, test } from 'node:test';
 import supertest from 'supertest';
 import { createHashPassword } from '../controllers/users.js';
 import app from '../index.js';
-import { User } from '../models/user.js';
-import { closeDB, sequelize } from '../util/db.js';
+import { Session, User } from '../models/index.js';
+import { closeDB } from '../util/db.js';
 import { adminUser, rootUser } from '../util/test_helper.js';
 
 const login = async (credentials, status, message) => {
@@ -13,22 +12,25 @@ const login = async (credentials, status, message) => {
 		.post('/api/login')
 		.send(credentials)
 		.expect(status);
+
 	if (message) assert.strictEqual(body.error, message);
-	return body;
+	return { body };
 };
 
 const api = supertest(app);
 
+let userId;
+
 before(async () => {
-	await sequelize.sync({ force: true });
 	const passwordHash = await createHashPassword(rootUser.password);
-	await User.create({ ...rootUser, password: passwordHash });
+	const user = await User.create({ ...rootUser, password: passwordHash });
+	userId = user.id;
 });
 
 describe('Login API', () => {
 	describe('when a user logs in', () => {
 		test('works with valid data', async () => {
-			const body = await login(
+			const { body } = await login(
 				{ username: rootUser.username, password: rootUser.password },
 				200
 			);
@@ -61,10 +63,22 @@ describe('Login API', () => {
 				'Invalid credentials'
 			);
 		});
+
+		test('fails with HTTP 401 if user is banned', async () => {
+			await api.put(`/api/users/${userId}/ban`);
+
+			const { body } = await api
+				.post('/api/login')
+				.send({ username: rootUser.username, password: rootUser.password })
+				.expect(401);
+
+			assert.strictEqual(body.error, 'user has been banned');
+		});
 	});
 });
 
 after(async () => {
-	await User.destroy({ where: { username: rootUser.username } });
+	await User.truncate({ cascade: true });
+	await Session.truncate({ cascade: true });
 	await closeDB();
 });

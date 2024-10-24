@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../util/db.js';
+
 export class Blog extends Model {}
 Blog.init(
 	{
@@ -28,6 +29,10 @@ Blog.init(
 		likes: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
+		},
+		year: {
+			type: DataTypes.INTEGER,
+			defaultValue: null,
 		},
 	},
 	{ sequelize, underscored: true, timestamps: false, modelName: 'blog' }

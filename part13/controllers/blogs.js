@@ -39,6 +39,13 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', tokenExtractor, userExtractor, async (req, res) => {
+	const { year } = req.body;
+	if (Number(year) < 1991)
+		throw Error('year cannot be less than 1991', { cause: 400 });
+
+	if (Number(year) > new Date().getFullYear())
+		throw Error('year cannot be greater than the current year', { cause: 400 });
+
 	const blog = await Blog.create({ ...req.body, userId: req.user.id });
 	const { userId, ...goodBlog } = blog.toJSON();
 	return res.status(201).json(goodBlog);

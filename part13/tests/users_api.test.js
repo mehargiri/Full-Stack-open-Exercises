@@ -1,14 +1,11 @@
-// import 'express-async-errors';
 import assert from 'node:assert';
 import { after, before, describe, test } from 'node:test';
-import { Op } from 'sequelize';
 import supertest from 'supertest';
 import { createHashPassword } from '../controllers/users.js';
 import app from '../index.js';
-import { User } from '../models/user.js';
-import { closeDB, sequelize } from '../util/db.js';
+import { User } from '../models/index.js';
+import { closeDB } from '../util/db.js';
 import {
-	nonExistingUserId,
 	nonExistingUserName,
 	rootUser,
 	users,
@@ -17,8 +14,11 @@ import {
 
 const api = supertest(app);
 
+let currentUsers;
+const newUsername = 'king@email.com';
+const badId = -10;
+
 const initializeUsers = async () => {
-	await sequelize.sync({ force: true });
 	const userObjs = await Promise.all(
 		users.map(async (item) => ({
 			...item,
@@ -26,6 +26,7 @@ const initializeUsers = async () => {
 		}))
 	);
 	await User.bulkCreate(userObjs);
+	currentUsers = await usersInDb();
 };
 
 const createUser = async (user, expectedStatus, expectedMessage) => {
@@ -76,14 +77,13 @@ describe('Users API', () => {
 
 	describe('getting a single user', () => {
 		test('works with a valid id', async () => {
-			const user = (await usersInDb())[0];
+			const user = currentUsers[0];
 			const { body } = await api.get(`/api/users/${user.id}`).expect(200);
 			assert.deepStrictEqual(body, user);
 		});
 
 		test('fails with HTTP 404 and a custom error message if id does not exist', async () => {
-			const newId = await nonExistingUserId();
-			const { body } = await api.get(`/api/users/${newId}`).expect(404);
+			const { body } = await api.get(`/api/users/${badId}`).expect(404);
 			assert.strictEqual(body.error, 'User not found. Check the id!');
 		});
 	});
@@ -94,7 +94,6 @@ describe('Users API', () => {
 			const totalUsers = await usersInDb();
 			assert.strictEqual(totalUsers.length, users.length + 1);
 			assert.ok(totalUsers.some((user) => user.name === body.name));
-			await User.destroy({ where: { username: rootUser.username } });
 		});
 
 		test('fails with HTTP 400 and a custom error message if name is missing', async () => {
@@ -131,31 +130,53 @@ describe('Users API', () => {
 
 	describe('updating username of a user', () => {
 		test('works with valid data', async () => {
-			const user = (await usersInDb())[0];
-			const newUsername = 'king@email.com';
+			const user = currentUsers[0];
 			const body = await updateUser(user.username, newUsername, 200);
 			assert.strictEqual(body.username, newUsername);
 		});
 
 		test('fails with HTTP 400 and a custom error message if new username is missing', async () => {
-			const user = (await usersInDb())[0];
+			const user = currentUsers[0];
 			await updateUser(user.username, null, 400, 'Missing username');
 		});
 
 		test('fails with HTTP 404 and a custom error message if username does not exist', async () => {
+			const badUsername = await nonExistingUserName();
 			await updateUser(
-				await nonExistingUserName(),
+				badUsername,
 				'king@email.com',
 				404,
 				'User not found. Check the username!'
 			);
 		});
 	});
+
+	describe('banning a user', () => {
+		test('works with valid id', async () => {
+			const user = currentUsers[0];
+			await api.put(`/api/users/${user.id}/ban`).expect(204);
+		});
+		test('fails with HTTP 404 if id is invalid', async () => {
+			const { body } = await api.put(`/api/users/${-10}/ban`).expect(404);
+
+			assert.strictEqual(body.error, 'User not found. Check the user id!');
+		});
+	});
+
+	describe('when there are no users', () => {
+		test('a custom message is returned', async () => {
+			await User.truncate({ cascade: true });
+			const { body } = await api
+				.get('/api/users')
+				.expect(200)
+				.expect('Content-Type', /application\/json/);
+
+			assert.strictEqual(body.msg, 'No users found');
+		});
+	});
 });
 
 after(async () => {
-	await User.destroy({
-		where: { username: { [Op.in]: users.map((user) => user.username) } },
-	});
+	await User.truncate({ cascade: true });
 	await closeDB();
 });

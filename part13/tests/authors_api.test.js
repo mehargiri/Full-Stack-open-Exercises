@@ -1,19 +1,15 @@
 import assert from 'node:assert';
 import { after, before, describe, test } from 'node:test';
-import { Op } from 'sequelize';
 import supertest from 'supertest';
 import { createHashPassword } from '../controllers/users.js';
 import app from '../index.js';
-import { Blog } from '../models/blog.js';
-import { User } from '../models/user.js';
-import { closeDB, sequelize } from '../util/db.js';
+import { Blog, User } from '../models/index.js';
+import { closeDB } from '../util/db.js';
 import { blogs, rootUser } from '../util/test_helper.js';
 
 const api = supertest(app);
 
 before(async () => {
-	await sequelize.sync({ force: true });
-
 	const passwordHash = await createHashPassword(rootUser.password);
 
 	const newUser = await User.create({ ...rootUser, password: passwordHash });
@@ -41,9 +37,7 @@ describe('Authors API', () => {
 			});
 
 			test('are not returned but a custom message is returned if there are no authors', async () => {
-				await Blog.destroy({
-					where: { title: { [Op.in]: blogs.map((blog) => blog.title) } },
-				});
+				await Blog.truncate({ cascade: true });
 
 				const { body } = await api
 					.get('/api/authors')
@@ -57,5 +51,6 @@ describe('Authors API', () => {
 });
 
 after(async () => {
+	await User.truncate({ cascade: true });
 	await closeDB();
 });

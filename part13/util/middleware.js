@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../models/index.js';
+import { Session, User } from '../models/index.js';
 import { SECRET } from './config.js';
 
 export const tokenExtractor = async (req, _res, next) => {
@@ -10,12 +10,26 @@ export const tokenExtractor = async (req, _res, next) => {
 
 	const decodedToken = jwt.verify(bearerToken, SECRET);
 
+	req.token = bearerToken;
 	req.decodedToken = decodedToken;
 	next();
 };
 
+const validateSession = async ({ userId, token }) => {
+	const session = await Session.findOne({ where: { userId } });
+
+	return session && session.token === token;
+};
+
 export const userExtractor = async (req, _res, next) => {
 	const user = await User.findByPk(req.decodedToken.id);
+	const isSessionValid = await validateSession({
+		userId: user.id,
+		token: req.token,
+	});
+
+	if (!isSessionValid) throw Error('Invalid Session', { cause: 401 });
+	if (user.disabled) throw Error('user has been banned!', { cause: 401 });
 	req.user = user.toJSON();
 	next();
 };
@@ -32,9 +46,12 @@ export const errorHandler = async (error, _req, res, _next) => {
 		return res.status(400).json({
 			error: error.errors.map((e) => e.message),
 		});
-	} else if (error.name === 'JsonWebTokenError') {
+	} else if (
+		error.name === 'JsonWebTokenError' ||
+		error.name === 'TokenExpiredError'
+	) {
 		return res.status(401).json({
-			error: error.message,
+			error: 'Invalid token',
 		});
 	} else {
 		console.error(error);

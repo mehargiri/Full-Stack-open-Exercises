@@ -29,6 +29,11 @@ User.init(
 		password: {
 			type: DataTypes.TEXT,
 		},
+		disabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
 	},
 	{ sequelize, underscored: true, modelName: 'user' }
 );

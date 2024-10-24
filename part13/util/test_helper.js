@@ -82,6 +82,7 @@ export const usersInDb = async () => {
 		include: {
 			model: Blog,
 			attributes: { exclude: ['userId'] },
+			as: 'readings',
 		},
 	});
 	return users.map((user) => user.toJSON());
@@ -98,24 +99,8 @@ export const blogsInDb = async () => {
 	return blogs.map((blog) => blog.toJSON());
 };
 
-export const nonExistingUserId = async () => {
-	const newUser = await User.create(rootUser);
-
-	await newUser.destroy();
-
-	return newUser.id.toString();
-};
-
-export const nonExistingBlogId = async () => {
-	const newBlog = await Blog.create(testBlog);
-
-	await newBlog.destroy();
-
-	return newBlog.id.toString();
-};
-
 export const nonExistingUserName = async () => {
-	const newUser = await User.create(rootUser);
+	const newUser = await User.create(adminUser);
 
 	await newUser.destroy();
 

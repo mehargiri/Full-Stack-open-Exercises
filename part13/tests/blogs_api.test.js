@@ -1,25 +1,23 @@
-// import 'express-async-errors';
 import assert from 'node:assert';
 import { after, before, describe, test } from 'node:test';
-import { Op } from 'sequelize';
 import supertest from 'supertest';
 import { createHashPassword } from '../controllers/users.js';
 import app from '../index.js';
-import { Blog } from '../models/blog.js';
-import { User } from '../models/user.js';
-import { closeDB, sequelize } from '../util/db.js';
+import { Blog, User } from '../models/index.js';
+import { closeDB } from '../util/db.js';
 import {
 	adminUser,
 	blogs,
 	blogsInDb,
-	nonExistingBlogId,
 	rootUser,
 	testBlog,
 } from '../util/test_helper.js';
 
 const api = supertest(app);
 
-let header, blogId;
+let header, blogId, currentBlogs;
+const testTitle1 = 'Awesome title';
+const badId = -10;
 
 const login = async (userLogin) => {
 	const { body } = await api.post('/api/login').send(userLogin);
@@ -27,8 +25,6 @@ const login = async (userLogin) => {
 };
 
 before(async () => {
-	await sequelize.sync({ force: true });
-
 	const passwordHash = await createHashPassword(rootUser.password);
 	const passwordHashAdmin = await createHashPassword(adminUser.password);
 
@@ -39,12 +35,16 @@ before(async () => {
 		...blog,
 		userId: newUser.id.toString(),
 	}));
+
 	await Blog.bulkCreate(blogObjs);
 
 	header = await login({
 		username: rootUser.username,
 		password: rootUser.password,
 	});
+
+	currentBlogs = await blogsInDb();
+	blogId = currentBlogs[0].id;
 });
 
 describe('Blog API', () => {
@@ -88,22 +88,12 @@ describe('Blog API', () => {
 		});
 
 		test('fails with HTTP 404 if id does not exist', async () => {
-			const newId = await nonExistingBlogId();
-			const { body } = await api.get(`/api/blogs/${newId}`).expect(404);
-
+			const { body } = await api.get(`/api/blogs/${badId}`).expect(404);
 			assert.strictEqual(body.error, 'Blog not found. Check the id!');
 		});
 	});
 
 	describe('Logged-in user actions', () => {
-		let totalBlogs;
-
-		before(async () => {
-			const { body } = await api.post('/api/blogs').set(header).send(testBlog);
-			blogId = body.id.toString();
-			totalBlogs = await blogsInDb();
-		});
-
 		describe('Creating a blog', () => {
 			const createBlogTest = async (blogData, status) => {
 				const { body } = await api
@@ -111,26 +101,60 @@ describe('Blog API', () => {
 					.set(header)
 					.send(blogData)
 					.expect(status);
-				return body;
+
+				return { body };
 			};
 
 			test('works with valid data', async () => {
 				await createBlogTest(testBlog, 201);
 
-				assert.strictEqual(totalBlogs.length, blogs.length + 1);
+				const totalBlogs = await blogsInDb();
 
 				assert.ok(totalBlogs.some((blog) => blog.title === testBlog.title));
 			});
 
 			test('works without author', async () => {
 				const { author, ...noAuthorBlog } = testBlog;
-				await createBlogTest(noAuthorBlog, 201);
+				await createBlogTest({ ...noAuthorBlog, title: testTitle1 }, 201);
 
-				assert.ok(totalBlogs.some((blog) => blog.title === noAuthorBlog.title));
+				const totalBlogs = await blogsInDb();
+
+				assert.ok(totalBlogs.some((blog) => blog.title === testTitle1));
+			});
+
+			const creationWithYear = async (year, status, error = null) => {
+				const { body } = await api
+					.post('/api/blogs')
+					.set(header)
+					.send({ ...testBlog, year })
+					.expect(status);
+
+				if (error) {
+					assert.strictEqual(body.error, error);
+				}
+				return { body };
+			};
+
+			test('works with valid data along with a valid year', async () => {
+				const { body } = await creationWithYear(2010, 201);
+				const totalBlogs = await blogsInDb();
+				assert.ok(totalBlogs.some((blog) => blog.year === body.year));
+			});
+
+			test('fails with HTTP 400 if year is less than 1991', async () => {
+				await creationWithYear(1990, 400, 'year cannot be less than 1991');
+			});
+
+			test('fails with HTTP 400 if year is more than current year', async () => {
+				await creationWithYear(
+					2050,
+					400,
+					'year cannot be greater than the current year'
+				);
 			});
 
 			test('fails with HTTP 400 if data is missing', async () => {
-				const body = await createBlogTest({}, 400);
+				const { body } = await createBlogTest({}, 400);
 				assert.deepStrictEqual(body.error, [
 					'url is required',
 					'title is required',
@@ -144,7 +168,7 @@ describe('Blog API', () => {
 				},
 				{
 					header: { Authorization: `Bearer invalidtoken` },
-					error: 'jwt malformed',
+					error: 'Invalid token',
 				},
 			];
 
@@ -165,17 +189,12 @@ describe('Blog API', () => {
 			test('works with a valid id', async () => {
 				await api.delete(`/api/blogs/${blogId}`).set(header).expect(204);
 
-				const { body } = await api
-					.post('/api/blogs')
-					.set(header)
-					.send(testBlog);
-				blogId = body.id.toString();
+				blogId = currentBlogs[1].id;
 			});
 
 			test('fails with HTTP 404 if id does not exist', async () => {
-				const newId = await nonExistingBlogId();
 				const { body } = await api
-					.delete(`/api/blogs/${newId}`)
+					.delete(`/api/blogs/${badId}`)
 					.set(header)
 					.expect(404);
 
@@ -186,7 +205,7 @@ describe('Blog API', () => {
 				{ token: '', error: 'Token missing', reason: 'there is no token' },
 				{
 					token: 'invalidToken',
-					error: 'jwt malformed',
+					error: 'Invalid token',
 					reason: 'token is invalid',
 				},
 				{
@@ -214,14 +233,6 @@ describe('Blog API', () => {
 		});
 
 		describe('Updating a blog', () => {
-			before(async () => {
-				const { body } = await api
-					.post('/api/blogs')
-					.set(header)
-					.send(testBlog);
-				blogId = body.id.toString();
-			});
-
 			test('works with valid likes', async () => {
 				const { body } = await api
 					.put(`/api/blogs/${blogId}`)
@@ -236,34 +247,31 @@ describe('Blog API', () => {
 			});
 
 			test('fails with HTTP 404 if id is invalid', async () => {
-				const newId = await nonExistingBlogId();
 				const { body } = await api
-					.put(`/api/blogs/${newId}`)
+					.put(`/api/blogs/${badId}`)
 					.send({ likes: 100 })
 					.expect(404);
 				assert.strictEqual(body.error, 'Blog not found. Check the id!');
+			});
+		});
+
+		describe('if blogs are not present', () => {
+			test('a custom message is returned', async () => {
+				await Blog.truncate({ cascade: true });
+
+				const { body } = await api
+					.get('/api/blogs')
+					.expect(200)
+					.expect('Content-Type', /application\/json/);
+
+				assert.strictEqual(body.msg, 'No blogs found');
 			});
 		});
 	});
 });
 
 after(async () => {
-	await User.destroy({
-		where: {
-			[Op.or]: [
-				{
-					username: rootUser.username,
-				},
-				{ username: adminUser.username },
-			],
-		},
-	});
-	await Blog.destroy({
-		where: {
-			title: {
-				[Op.in]: [...blogs.map((blog) => blog.title), testBlog.title],
-			},
-		},
-	});
+	await User.truncate({ cascade: true });
+	// await Blog.truncate({ cascade: true });
 	await closeDB();
 });
